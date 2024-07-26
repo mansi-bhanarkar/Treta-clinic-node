@@ -34,11 +34,11 @@ module.exports = {
       path: {
         type: Sequelize.STRING
       },
-      constent_id: {
+      consent_id: {
         type: Sequelize.INTEGER,
         allowNull: true,
         references: {         
-          model: 'Constents',
+          model: 'Consents',
           key: 'id'
         }
       },

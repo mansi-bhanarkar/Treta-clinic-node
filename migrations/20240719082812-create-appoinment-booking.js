@@ -81,7 +81,8 @@ module.exports = {
         type: Sequelize.STRING
       },
       payment_refrence_number: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: true,
       },
       remark: {
         type: Sequelize.TEXT('long')

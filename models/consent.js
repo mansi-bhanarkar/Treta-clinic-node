@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Constent extends Model {
+  class Consent extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -13,14 +13,15 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  Constent.init({
+  Consent.init({
     name: DataTypes.STRING,
     path: DataTypes.STRING,
+    uuid: DataTypes.UUID,
     created_by: DataTypes.INTEGER,
     updated_by: DataTypes.INTEGER
   }, {
     sequelize,
-    modelName: 'Constent',
+    modelName: 'Consent',
   });
-  return Constent;
+  return Consent;
 };

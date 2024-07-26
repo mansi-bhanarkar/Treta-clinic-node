@@ -29,6 +29,7 @@ module.exports = {
         }
       },
       name_of_procedure: {
+        allowNull: true,
         type: Sequelize.STRING
       },
       time_slot: {

@@ -19,7 +19,7 @@ module.exports = {
       },
       payment_master_id: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {         
           model: 'Payment_masters',
           key: 'id'
