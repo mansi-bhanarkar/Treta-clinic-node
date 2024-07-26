@@ -198,8 +198,6 @@ async function update(req, res) {
             message: "Unauthorized User"
         })
     }
-
-
 }
 
 async function userStatusUpdate(req, res) {
@@ -305,11 +303,11 @@ function login(req, res) {
                 if (result) {
                     const token = jwt.sign({
                         user: user
-                    }, 'secret', function (err, token) {
-                        res.status(200).json({
-                            message: "Authentication successful",
-                            token: token
-                        })
+                    }, 'secret', { expiresIn: "8h" })
+
+                    res.status(200).json({
+                        message: "Authentication successful",
+                        token: token
                     })
                 } else {
                     res.status(401).json({

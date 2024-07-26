@@ -13,8 +13,8 @@ function checkauth(req, res, next) {
             error: error
         });
     }
-
 }
+
 module.exports = {
     checkauth: checkauth
 }
