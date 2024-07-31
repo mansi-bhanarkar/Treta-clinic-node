@@ -32,7 +32,7 @@ module.exports = {
       },
       appoinment_duration: {
         allowNull: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.FLOAT
       },
       in_time: {
         allowNull: false,

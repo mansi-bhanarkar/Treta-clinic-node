@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Appoinment_bookings', {
+    await queryInterface.createTable('Appointment_bookings', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -69,10 +69,10 @@ module.exports = {
         type: Sequelize.STRING
       },
       time_slot: {
-        type: Sequelize.DATE
+        type: Sequelize.TIME
       },
       appoinment_date: {
-        type: Sequelize.DATE
+        type: Sequelize.DATEONLY
       },
       complaints: {
         type: Sequelize.TEXT('long')
@@ -124,6 +124,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Appoinment_bookings');
+    await queryInterface.dropTable('Appointment_bookings');
   }
 };

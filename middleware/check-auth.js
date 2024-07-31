@@ -9,6 +9,7 @@ function checkauth(req, res, next) {
         next();
     } catch (error) {
         return res.status(401).json({
+            status:401,
             message: "Invalid Token.",
             error: error
         });

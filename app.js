@@ -8,6 +8,7 @@ const userRoute = require("./routes/users");
 const masterRoute = require("./routes/master");
 const procedureRoute = require("./routes/procedures");
 const settingRoute = require('./routes/setting');
+const appoinmentRoute = require('./routes/appointments');
 
 var bodyParser = require('body-parser');
 app.use(bodyParser.json());
@@ -18,6 +19,7 @@ app.use("/branch", branchRoute);
 app.use("/master", masterRoute);
 app.use("/procedure", procedureRoute);
 app.use("/setting", settingRoute);
+app.use("/appointment",appoinmentRoute);
 
 
 module.exports = app;

@@ -16,7 +16,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {         
-          model: 'Appoinment_bookings',
+          model: 'Appointment_bookings',
           key: 'id'
         }
       },
@@ -33,10 +33,10 @@ module.exports = {
         type: Sequelize.STRING
       },
       time_slot: {
-        type: Sequelize.DATE
+        type: Sequelize.TIME
       },
-      appoinment_date: {
-        type: Sequelize.DATE
+      appointment_date: {
+        type: Sequelize.DATEONLY
       },
       next_session: {
         allowNull: true,

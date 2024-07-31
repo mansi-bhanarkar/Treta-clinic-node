@@ -9,7 +9,7 @@ const validatationRules = [
     .isInt().withMessage('Working day must be a number'),
 body('appoinment_duration')
     .notEmpty().withMessage('Appointment duration is required')
-    .isInt().withMessage('Appointment duration must be a number'),
+    .isFloat().withMessage('Appointment duration must be a number'),
 body('working_hours')
     .notEmpty().withMessage('Working hours is required'),
 body('in_time')
