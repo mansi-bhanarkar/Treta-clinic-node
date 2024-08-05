@@ -11,10 +11,20 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+
     }
   }
   Procedure_package_detail.init({
-    amount: DataTypes.INTEGER
+    uuid : DataTypes.UUID,
+    procedure_package_id : DataTypes.INTEGER,
+    procedure_id : DataTypes.INTEGER,
+    amount: DataTypes.INTEGER,
+    no_of_session: DataTypes.INTEGER,
+    is_active: DataTypes.BOOLEAN,
+    is_refund: DataTypes.BOOLEAN,
+    is_cancelled: DataTypes.BOOLEAN,
+    created_by : DataTypes.INTEGER,
+    updated_by : DataTypes.INTEGER,
   }, {
     sequelize,
     modelName: 'Procedure_package_detail',

@@ -31,7 +31,8 @@ const validationRules = [
     body('amount').notEmpty().withMessage('Amount is Required'),
     // body('payment_refrence_number').optional().isInt().withMessage('payment_refrence_number should be an integer.'),
 
-];const validationRulesForProcedure = [
+]; 
+const validationRulesForProcedure = [
     body('customer_id')
         .notEmpty().withMessage('Customer ID is required')
         .isInt().withMessage('Customer ID must be a number'),
@@ -66,9 +67,9 @@ const validationRules = [
         .notEmpty().withMessage('Amount is required')
         .isFloat({ gt: 0 }).withMessage('Amount must be a positive number'),
 
-  /*   body('payment_reference_number')
-        .optional()
-        .isInt().withMessage('Payment reference number should be an integer'), */
+    /*   body('payment_reference_number')
+          .optional()
+          .isInt().withMessage('Payment reference number should be an integer'), */
 ];
 async function create(req, res) {
     const errors = validationResult(req);
@@ -171,6 +172,8 @@ async function create(req, res) {
 }
 
 async function getAllAppointment(req, res) {
+    console.log("getAllAppointment");
+
     const { startDate, endDate } = req.body;
     const branchUuid = req.params.branch_uuid;
     const doctor_uuid = req.params.doctor_uuid;
@@ -253,7 +256,95 @@ async function getAllAppointment(req, res) {
         });
         res.status(200).json({
             status: 200,
-            message: result,
+            data: result,
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 500,
+            message: "something went wrong.",
+            errors: error.message
+        });
+    }
+}
+
+async function getDoctorSpecificAppointment(req, res) {
+
+    const { startDate, endDate } = req.body;
+    const doctor_uuid = req.params.doctor_uuid;
+
+    try {
+
+        // Check if user (doctor) exists
+        const user = await models.User.findOne({ where: { uuid: doctor_uuid } });
+        if (!user) {
+            return res.status(404).json({
+                status: 404,
+                message: "User not found"
+            });
+        }
+        // Check if user (setting) exists
+        const setting = await models.Setting.findOne({ where: { user_id: user.id } });
+        if (!setting) {
+            return res.status(404).json({
+                status: 404,
+                message: "setting not found"
+            });
+        }
+
+        const appointments = await models.Appointment_booking.findAll({
+            where: {
+                appoinment_date: {
+                    [Op.between]: [startDate, endDate],
+                },
+
+                refering_doctor_id: user.id,
+            },
+            order: [
+                ['appoinment_date', 'ASC'], // Sort by appoinment_date ascending
+                ['time_slot', 'ASC'], // Then sort by time_slot ascending
+            ],
+        });
+        // Organize appointments into date-wise and time-wise objects
+        /* const dateWiseAppointments = {};
+        appointments.forEach(appointment => {
+            let date = appointment.appoinment_date;
+            if (!(date instanceof Date)) {
+                date = new Date(date); // Ensure date is a Date object
+            }
+            const formattedDate = date.toISOString().split('T')[0]; // Format date as YYYY-MM-DD
+
+            if (!dateWiseAppointments[formattedDate]) {
+                dateWiseAppointments[formattedDate] = {};
+            }
+
+            const timeSlot = appointment.time_slot;
+            if (!dateWiseAppointments[formattedDate][timeSlot]) {
+                dateWiseAppointments[formattedDate][timeSlot] = [];
+            }
+            dateWiseAppointments[formattedDate][timeSlot].push(appointment);
+        });
+
+        // Generate empty objects for time slots between startTime and endTime with gap
+        const startTime = setting.in_time;
+        const endTime = setting.out_time;
+        const gapInHours = setting.appoinment_duration; // Gap between time slots in hours
+        const timeSlots = helper.generateTimeSlots(startTime, endTime, gapInHours);
+
+        const result = {};
+        Object.keys(dateWiseAppointments).forEach(date => {
+            result[date] = {};
+            timeSlots.forEach(timeSlot => {
+                if (!dateWiseAppointments[date][timeSlot]) {
+                    result[date][timeSlot] = [];
+                } else {
+                    result[date][timeSlot] = dateWiseAppointments[date][timeSlot];
+                }
+            });
+        }); */
+        res.status(200).json({
+            status: 200,
+            data: appointments,
+            // message: result, // if need a date and time wise code then uncomment above code
         });
     } catch (error) {
         res.status(500).json({
@@ -354,7 +445,7 @@ async function update(req, res) {
 }
 
 async function getsingleAppointment(req, res) {
-    
+
     const getcase_id = req.params.case_id;
 
     try {
@@ -418,11 +509,12 @@ async function createProcedure(req, res) {
         const userData = req.userData;
 
         const data = {
-            uuid:generateUniqueId(),
+            uuid: generateUniqueId(),
             customer_id: getcustomer_id,
             time_slot: req.body.time_slot,
             appointment_date: req.body.appointment_date,
             name_of_procedure: req.body.name_of_procedure,
+            procedure_package_details_id: req.body.procedure_package_details_id,
             next_session: req.body.next_session,
             payment_type: req.body.payment_type,
             payment_refrence_number: req.body.payment_refrence_number,
@@ -432,9 +524,9 @@ async function createProcedure(req, res) {
             created_by: userData.user.id,
             updated_by: userData.user.id,
         }
-       let procedure = await models.Procedure_detail.create(data);
+        let procedure = await models.Procedure_detail.create(data);
 
-          const paylog = {
+        const paylog = {
             customer_id: getcustomer_id,
             payment_status_id: req.body.payment_status_id,
             procedure_detail_id: procedure.id,
@@ -458,7 +550,8 @@ async function createProcedure(req, res) {
     }
 }
 
-async function getProcedures(req,res) {
+async function getProcedures(req, res) {
+
     const { startDate, endDate } = req.body;
     const branchUuid = req.params.branch_uuid;
     const doctor_uuid = req.params.doctor_uuid;
@@ -480,7 +573,7 @@ async function getProcedures(req,res) {
                 message: "User not found"
             });
         }
-        
+
 
         const appointments = await models.Appointment_booking.findAll({
             where: {
@@ -495,7 +588,7 @@ async function getProcedures(req,res) {
                 as: 'Procedure_details' // Make sure this alias matches the one defined in your association
             }]
         });
-        
+
         res.status(200).json({
             status: 200,
             message: appointments,
@@ -509,11 +602,202 @@ async function getProcedures(req,res) {
     }
 }
 
+async function getDoctorSpecificProcedure(req, res) {
+    console.log("getDoctorSpecificProcedure");
+    const { startDate, endDate } = req.body;
+    const doctor_uuid = req.params.doctor_uuid;
+    try {
+
+        // Check if user (doctor) exists
+        const user = await models.User.findOne({ where: { uuid: doctor_uuid } });
+        if (!user) {
+            return res.status(404).json({
+                status: 404,
+                message: "User not found"
+            });
+        }
+
+
+        const appointments = await models.Appointment_booking.findAll({
+            where: {
+                appoinment_date: {
+                    [Op.between]: [startDate, endDate],
+                },
+                refering_doctor_id: user.id,
+            },
+            include: [{
+                model: models.Procedure_detail,
+                as: 'Procedure_details' // Make sure this alias matches the one defined in your association
+            }]
+        });
+
+        res.status(200).json({
+            status: 200,
+            data: appointments,
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 500,
+            message: "something went wrong.",
+            errors: error.message
+        });
+    }
+}
+
+async function updateProcedure(req, res) {
+    let t; // Define t outside try block for proper rollback
+    try {
+        t = await models.sequelize.transaction(); // Start a new transaction
+
+        // Validate request
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            await t.rollback(); // Rollback transaction on validation error
+            return res.status(422).json({
+                message: "Validation error!",
+                errors: errors.array()
+            });
+        }
+
+        const getUuid = req.params.uuid;
+
+        // Fetch procedure detail
+        let procedureDetail = await models.Procedure_detail.findOne({
+            where: { uuid: getUuid },
+            transaction: t // Include transaction in the query
+        });
+
+        if (!procedureDetail) {
+            await t.rollback(); // Rollback transaction if procedure not found
+            return res.status(404).json({
+                status: 404,
+                message: "Procedure Detail not found"
+            });
+        }
+
+        const userData = req.userData;
+
+        const data = {
+            time_slot: req.body.time_slot,
+            appointment_date: req.body.appointment_date,
+            name_of_procedure: req.body.name_of_procedure,
+            procedure_package_details_id: req.body.procedure_package_details_id,
+            next_session: req.body.next_session,
+            payment_type: req.body.payment_type,
+            payment_refrence_number: req.body.payment_refrence_number,
+            amount: req.body.amount,
+            status_id: req.body.status_id,
+            updated_by: userData.user.id,
+        };
+
+        // Update procedure detail
+        await models.Procedure_detail.update(data, {
+            where: { uuid: getUuid },
+            transaction: t // Include transaction in the query
+        });
+
+        // Create payment log
+        const paylog = {
+            customer_id: req.body.customer_id,
+            payment_status_id: req.body.payment_status_id,
+            procedure_detail_id: procedureDetail.id,
+            amount: req.body.amount,
+        };
+
+        await models.Payment_log.create(paylog, {
+            transaction: t // Include transaction in the query
+        });
+
+        await t.commit(); // Commit transaction if all operations are successful
+
+        return res.status(200).json({
+            status: 200,
+            data: "Procedure updated successfully."
+        });
+    } catch (error) {
+        if (t) await t.rollback(); // Ensure transaction is rolled back on error
+
+        console.error(error);
+        return res.status(500).json({
+            status: 500,
+            message: "Internal Server Error",
+            error: error.message
+        });
+    }
+}
+
+async function getProcedureViaCaseID(req, res) {
+    try {
+        const caseId = req.params.case_id;
+        let appointment = await models.Appointment_booking.findOne({
+            where: { case_id: caseId }
+
+        });
+
+        // Check if appointment was found
+        if (!appointment) {
+            return res.status(404).json({
+                status: 404,
+                message: "Appointment not found"
+            });
+        }
+        let procedureDetails = await models.Procedure_detail.findAll({
+            where: { customer_id: appointment.id }
+        });
+        return res.status(200).json({
+            status: 200,
+            data: procedureDetails
+
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 500,
+            message: "Internal Server Error",
+            error: error
+
+        });
+    }
+}
+
+async function getSingleProcedure(req, res) {
+    try {
+        const uuid = req.params.uuid;
+
+        let procedureDetails = await models.Procedure_detail.findOne({
+            where: { uuid: uuid }
+        });
+        if (!procedureDetails) {
+            return res.status(404).json({
+                status: 404,
+                message: "Procedure not found"
+            });
+        }
+        return res.status(200).json({
+            status: 200,
+            data: procedureDetails
+
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 500,
+            message: "Internal Server Error",
+            error: error
+
+        });
+    }
+}
+
+
 module.exports = {
     create: [...validationRules, create],
     update: [...validationRules, update],
     createProcedure: [...validationRulesForProcedure, createProcedure],
+    updateProcedure: [...validationRulesForProcedure, updateProcedure],
     getAllAppointment: getAllAppointment,
+    getDoctorSpecificAppointment: getDoctorSpecificAppointment,
     getsingleAppointment: getsingleAppointment,
     getProcedures: getProcedures,
+    getDoctorSpecificProcedure: getDoctorSpecificProcedure,
+    getProcedureViaCaseID: getProcedureViaCaseID,
+    getSingleProcedure: getSingleProcedure,
 }
